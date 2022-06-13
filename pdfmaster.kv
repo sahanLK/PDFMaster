@@ -1,0 +1,505 @@
+
+<Check@MDCheckbox>:
+    size_hint: None, None
+    size: dp(48), dp(48)
+
+<Space@Widget>:
+    size_hint_y: None
+    height: 50
+
+<MyLabel@MDLabel>:
+    size_hint_y: None
+    height: self.texture_size[1] + 30
+    pos_hint: {'center_y': 0.5}
+
+
+<HomeScreen>:
+    name: 'home_screen'
+    id: home_screen
+    MDNavigationLayout:
+        ScreenManager:
+            Screen:
+                BoxLayout:
+                    orientation: 'vertical'
+                    MDToolbar:
+                        title: '[size=32]PDF Master'
+                        left_action_items: [ ['menu', lambda x: nav_menu.set_state()] ]
+                        #right_action_items: [ ['dots-vertical', lambda x: app.open_menu(x)] ]
+                        elevation: 10
+
+                    ScrollView:
+                        MDList:
+                            padding: 40
+                            OneLineAvatarListItem:
+                                text: 'Images to PDF'
+                                on_release:
+                                    root.manager.transition.direction='left'
+                                    root.manager.current = 'img_to_pdf_screen'
+                                IconLeftWidget:
+                                    icon: 'image-multiple-outline'
+                            OneLineAvatarListItem:
+                                text: 'Merge PDF'
+                                on_release:
+                                    root.manager.transition.direction='left'
+                                    root.manager.current = 'merge_pdf_screen'
+                                IconLeftWidget:
+                                    icon: 'file-pdf-box-outline'
+                            OneLineAvatarListItem:
+                                text: 'Watermark PDF'
+                                on_release:
+                                    root.manager.transition.direction='left'
+                                    root.manager.current = 'watermark_screen'
+                                IconLeftWidget:
+                                    #icon: 'book-marker-outline'
+                                    icon: 'water-outline'
+                            OneLineAvatarListItem:
+                                text: 'Secure PDF'
+                                on_release:
+                                    root.manager.transition.direction='left'
+                                    root.manager.current = 'secure_pdf_screen'
+                                IconLeftWidget:
+                                    icon: 'key-variant'
+
+    MDNavigationDrawer:
+        id: nav_menu
+        elevation: 3
+        ScrollView:
+            size_hint_y: None
+            height: root.height
+            BoxLayout:
+                id: complete_layout
+                orientation: 'vertical'
+                size_hint_y: None
+                height: root.ids.top_design.height + root.ids.items_list.height + root.ids.space.height
+                GridLayout:
+                    id: top_design
+                    cols: 2
+                    size_hint_y: None
+                    height: root.ids.logo_img.height + 100  
+                    padding: 25
+                    spacing: 20
+                    canvas:
+                        Color:
+                            rgba: 0,153/255,230/255,1
+                        Rectangle:
+                            size: root.ids.top_design.width, root.ids.top_design.height
+                            pos: root.ids.top_design.pos
+                    Image:
+                        id: logo_img
+                        source: 'assets/icon.png'
+                        size_hint: None, None
+                        size: dp(60), dp(60)
+                    MDLabel:
+                        size_hint_y: None
+                        height: self.texture_size[1]
+                        text: 'Version 1.0.0'
+                        theme_text_color: 'Custom'
+                        text_color: 1,1,1,1
+                Widget:
+                    id: space
+                    size_hint_y: None
+                    height: 60
+                MDList:
+                    id: items_list
+                    size_hint_y: None
+                    height: root.ids.complete_layout.height - (root.ids.top_design.height + root.ids.space.height)
+                    padding: 20
+                    OneLineIconListItem:
+                        text: '   Exit'
+                        on_release: app.exit_app_dialog.open()
+                        IconLeftWidget:
+                            icon: 'exit-to-app'
+
+<ImgToPdfScreen>:
+    name: 'img_to_pdf_screen'
+    id: img_to_pdf_screen
+
+    MDNavigationLayout:
+        ScreenManager:
+            Screen:
+                BoxLayout:
+                    id: main_layout
+                    orientation: 'vertical'
+                    HomeButton:
+                        on_release:
+                            root.manager.transition.direction='right'
+                            root.manager.current = 'home_screen'
+                    MDRectangleFlatButton:
+                        id: add_img_but
+                        text: 'Add Images'
+                        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                        on_release: root.image_chooser_popup()
+                    BoxLayout:
+                        padding: 20
+                        orientation: 'vertical'
+                        ScrollView:
+                            canvas.before:
+                                Color:
+                                    rgba: 237/255.0, 237/255.0, 237/255.0, 0.2
+                                Rectangle:
+                                    size: root.size
+                            MDList:
+                                id: img_to_pdf_preview_pane
+                                spacing: 5
+                                padding: 10
+                    MDBottomAppBar:
+                        id: img_to_pdf_bottom_bar
+                        MDToolbar:
+                            id: bottom_toolbar
+                            type: 'bottom'
+                            title: ''
+                            icon: 'file-pdf-outline'
+                            mode: 'center'     # Icon Position: '’free-end’ / ’free-center’ / ’end’ / ’center’'
+                            on_action_button: root.get_file_name()     # The action when clicking the icon
+                            right_action_items: [['delete-off', lambda x: root.clear_selection_completely()], ['cog-sync', lambda x: root.ids.nav_menu.set_state()]]
+
+    MDNavigationDrawer:
+        id: nav_menu
+        anchor: 'right'
+        ScrollView:
+            size_hint_y: None
+            height: root.height
+            MDList:
+                padding:45
+
+                # GET MARGINS.
+                MyLabel:
+                    text: 'Page Margins (mm)'
+                GridLayout:
+                    cols: 2
+                    size_hint_y: None
+                    height: root.ids.left_margin_field.height * 3
+                    MyLabel:
+                        id: left_margin_label
+                        size_hint_x: None
+                        width: 100
+                        text: '     Left   :'
+                    MDTextField:
+                        id: left_margin_field
+                        input_filter: 'int'
+                        size_hint_x: None
+                        width: 70
+
+                    MyLabel:
+                        text: '     Top   :'
+                        size_hint_x: None
+                        width: 100
+                    MDTextField:
+                        id: top_margin_field
+                        input_filter: 'int'
+                        size_hint_x: None
+                        width: 70
+
+                    MyLabel:
+                        text: '     Right :'
+                        size_hint_x: None
+                        width: 100
+                    MDTextField:
+                        id: right_margin_field
+                        input_filter: 'int'
+                        size_hint_x: None
+                        width: 70
+                Space:
+
+                # SET HEADER TEXT
+                MDTextField:
+                    id: header_text_field
+                    hint_text: 'Header text'
+                    mode: 'rectangle'
+                Space:
+
+                # SET HEADER TEXT
+                MDTextField:
+                    id: footer_text_field
+                    hint_text: 'Footer text'
+                    mode: 'rectangle'
+                Space:
+
+                # SET PAPER SIZE.
+                MyLabel:
+                    text: 'Paper Size '
+                GridLayout:
+                    cols: 2
+                    size_hint_y: None
+                    height: root.ids.label.height * 6
+
+                    Check:
+                        active: True
+                        group: 'size_group'
+                        on_active: root._set_size_a4(*args)
+                    MyLabel:
+                        id: label
+                        text: 'A4'
+
+                    Check:
+                        group: 'size_group'
+                        on_active: root._set_size_a3(*args)
+                    MyLabel:
+                        id: label
+                        text: 'A3'
+
+                    Check:
+                        group: 'size_group'
+                        on_active: root._set_size_a5(*args)
+                    MyLabel:
+                        id: label
+                        text: 'A5'
+
+                    Check:
+                        group: 'size_group'
+                        on_active: root._set_size_letter(*args)
+                    MyLabel:
+                        text: 'LETTER'
+
+                    Check:
+                        group: 'size_group'
+                        on_active: root._set_size_legal(*args)
+                    MyLabel:
+                        text: 'LEGAL'
+
+                # SET PDF QUALITY
+                MyLabel:
+                    text: 'Quality '
+                GridLayout:
+                    cols: 2
+                    size_hint_y: None
+                    height: root.ids.label.height * 3
+
+                    Check:
+                        active: True
+                        group: 'quality_group'
+                        on_active: root._set_quality_normal(*args)
+                    MyLabel:
+                        id: label
+                        text: 'Normal'
+
+                    Check:
+                        group: 'quality_group'
+                        on_active: root._set_quality_medium(*args)
+                    MyLabel:
+                        text: 'Medium'
+
+                    Check:
+                        group: 'quality_group'
+                        on_active: root._set_quality_low(*args)
+                    MyLabel:
+                        text: 'Low'
+                Space:
+
+                # SET PAGE ORIENTATION
+                MyLabel:
+                    text: 'Orientation'
+                GridLayout:
+                    cols: 2
+                    size_hint_y: None
+                    height: root.ids.vertical.height + 40
+
+                    Check:
+                        active: True
+                        group: 'orientation_group'
+                        on_active: root._set_orient_portrait(*args)
+                    MyLabel:
+                        id: vertical
+                        text: 'Portrait'
+
+                    Check:
+                        group: 'orientation_group'
+                        on_active: root._set_orient_landscape(*args)
+                    MyLabel:
+                        text: 'Landscape'
+                Space:
+
+                # ADD PAGE NUMBERS
+                GridLayout:
+                    cols: 2
+                    size_hint_y: None
+                    height: root.ids.page_num_label.height + 30
+                    MyLabel:
+                        id: page_num_label
+                        text: 'Add page numbers'
+                    MDSwitch:
+                        on_active: root._set_page_numbering(*args)
+
+
+<MergePdfScreen>:
+    name: 'merge_pdf_screen'
+    BoxLayout:
+        orientation: 'vertical'
+        HomeButton:
+            on_release:
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'home_screen'
+        MDRectangleFlatButton:
+            text: 'Select PDF Files'
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            on_release: root.merge_pdf_popup()
+        BoxLayout:
+            padding: 20
+            ScrollView:
+                canvas.before:
+                    Color:
+                        rgba: 237/255.0, 237/255.0, 237/255.0, 0.2
+                    Rectangle:
+                        size: root.size
+                MDList:
+                    id: merge_pdf_preview_pane
+                    padding: 5
+
+        MDBottomAppBar:
+            MDToolbar:
+                id: merge_pdf_bottom_bar
+                type: 'bottom'
+                title: ''
+                icon: 'file-pdf-outline'
+                mode: 'center'     # Icon Position: ’free-end’ / ’free-center’ / ’end’ / ’center’
+                on_action_button: root.get_file_name()      # The action when clicking the icon:
+                right_action_items: [ ['delete-off', lambda x: root.clear_selection_completely()] ]
+
+
+<WatermarkScreen>:
+    name: 'watermark_screen'
+    BoxLayout:
+        orientation: 'vertical'
+        id: top_layout
+        HomeButton:
+            on_release:
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'home_screen'
+        MDRectangleFlatButton:
+            text: 'Select PDF'
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            on_release: root.select_pdf_to_watermark()
+        BoxLayout:
+            id: watermark_pdf_preview
+            size_hint: 0.7, None
+            height: 80
+            pos_hint: {'center_x': 0.5}
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 25
+            ScrollView:
+                MDList:
+                    spacing: 40
+                    padding: 30
+                    canvas:
+                        Color:
+                            rgba: 237/255.0, 237/255.0, 237/255.0, 0.2
+                        Rectangle:
+                            size: root.size
+                            pos: root.pos
+                    BoxLayout:
+                        orientation: 'vertical'
+                        size_hint_y: None
+                        height: root.ids.desc_label.height + root.ids. wm_source_but.height
+                        MDRoundFlatButton:
+                            id: wm_source_but
+                            text: 'select watermark source'
+                            pos_hint: {'center_x': 0.5}
+                            on_release: root.select_watermark_source(['.jpg', '.JPG', '.JPEG', '.png', '.PNG', '.pdf'])
+                        MyLabel:
+                            id: desc_label
+                            text: 'Image or pdf page'
+                            size_hint_x: None
+                            width: (root.ids.wm_source_but.width/2) + 20
+                            pos_hint: {'center_x': 0.5}
+                            font_style: 'Caption'
+                            color: 102/255, 102/255, 102/255, 1
+                    BoxLayout:
+                        orientation: 'vertical'
+                        id: watermark_source
+                        size_hint_y: None
+                        height: dp(48)
+                    GridLayout:
+                        cols: 2
+                        size_hint_y: None
+                        height: root.ids.page_no_field.height
+                        id: page_no_layout
+                        disabled: True
+                        MyLabel:
+                            text: '    Use page no:'
+                            size_hint_x: None
+                            width: 180
+                        MDTextField:
+                            id: page_no_field
+                            size_hint_x: None
+                            width: 50
+                            input_filter: 'int'
+                    Widget:
+                    BoxLayout:
+                        orientation: 'vertical'
+                        id: checkbox_layout
+                        CheckboxWidget:
+                            id: delete_orig_file
+                            text: 'Delete original file after'
+
+        MDBottomAppBar:
+            id: bottom_bar
+            MDToolbar:
+                type: 'bottom'
+                icon: 'water-outline'
+                mode: 'center'
+                on_action_button: root.get_file_name()
+
+
+<SecurePdfScreen>:
+    name: 'secure_pdf_screen'
+    BoxLayout:
+        orientation: 'vertical'
+        id: top_layout
+        HomeButton:
+            on_release:
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'home_screen'
+        MDRectangleFlatButton:
+            text: 'Select PDF'
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            on_release: root.open_manager()
+        Space:
+        ScrollView:
+            MDList:
+                padding: 50
+                spacing: 40
+                Widget:
+
+                BoxLayout:
+                    id: secure_pdf_preview_pane
+                MDTextField:
+                    id: passwd_field
+                    password: True
+                    icon_right: 'key-variant'
+                    hint_text: 'Password'
+                    helper_text: 'Required *'
+                    helper_text_mode: "persistent"
+                    max_text_length: 50
+                    size_hint_x: 0.75
+                GridLayout:
+                    cols: 2
+                    size_hint_y: None
+                    height: dp(48)
+                    MDCheckbox:
+                        id: show_password
+                        size_hint: None, None
+                        size: dp(48), dp(48)
+                        on_active: root.toggle_password_field(*args)
+                    MDLabel:
+                        id: show_password_checkbox
+                        text: 'show password'
+                        size_hint_y: None
+                        height: dp(48)
+                    MDCheckbox:
+                        id: orig_file_del
+                        size_hint: None, None
+                        size: dp(48), dp(48)
+                        on_active: root.delete_orig_file(*args)
+                    MDLabel:
+                        id: file_delete
+                        text: 'delete original file after'
+                        size_hint_y: None
+                        height: dp(48)
+
+        MDBottomAppBar:
+            MDToolbar:
+                type: 'bottom'
+                icon: 'key-variant'
+                mode: 'center'
+                on_action_button: root.get_file_name()
